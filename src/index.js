@@ -2,8 +2,8 @@ var Alexa = require('alexa-sdk');
 var http = require('http');
 
 var states = {
-    SEARCHMODE: '_SEARCHMODE',
-    TOPFIVE: '_TOPFIVE',
+    PHRASES: '_PHRASES',
+    RATE: '_RATE',
 };
 
 var location = "Seattle";
@@ -32,7 +32,7 @@ var getMoreInfoRepromtMessage = "What number attraction would you like to hear a
 
 var getMoreInfoMessage = "OK, " + getMoreInfoRepromtMessage;
 
-var goodbyeMessage = "OK, have a nice time in " + location + ".";
+var goodbyeMessage = "Later dude!";
 
 var newsIntroMessage = "These are the " + numberOfResults + " most recent " + location + " headlines, you can read more on your Alexa app. ";
 
@@ -43,6 +43,20 @@ var newline = "\n";
 var output = "";
 
 var alexa;
+
+var phrases = [
+  'This is really dummy dumm dumm.',
+  'My name is stink face toilet butt',
+  'I saw you picking your nose',
+  'Look! There is a unicorn outside! Why is she wearing a jet pack?',
+  'I like to eat garbage. It tastes like chicken. Popcorn chicken.',
+  'Pooop poopy poo poo pee',
+  'There\'s a tiny demon in your shoe. I promise',
+  'When you least expect it I will be watching',
+  'Toadstool pumpkin diarrhea',
+  'arbajarba humbleback',
+  'I feel ickly sickly'
+];
 
 var attractions = [
     { name: "Woodland Park Zoo", content: "located just 10 minutes north of downtown Seattle. The zoo's 92-acres and award-winning exhibits are home to more than 1,000 animals representing 300 species from around the world.", location: "There are two zoo entrances. \n West Entrance:\n Cross streets: Phinney Ave. N. between N. 55th St. & N. 56th St.\n Street address: 5500 Phinney Ave. N., Seattle WA 98103\n South Entrance:\n Cross streets: N. 50th Street & Fremont Ave. N.\n Street address: 750 N. 50th Street, Seattle WA 98103", contact: "zooinfo@zoo.org\n 206 548 2500" },
@@ -64,11 +78,10 @@ var topFiveIntro = "Here are the top five things to  do in " + location + ".";
 
 var newSessionHandlers = {
     'LaunchRequest': function () {
-        this.handler.state = states.SEARCHMODE;
-
-        output = welcomeMessage;
-
-        this.emit(':ask', output, welcomeRepromt);
+      this.handler.state = states.PHRASES;
+      //output = welcomeMessage;
+      //this.emit(':ask', output, welcomeRepromt);
+      this.emitWithState('sayPhrase');
     },
     'getAttractionIntent': function () {
         this.handler.state = states.SEARCHMODE;
@@ -99,7 +112,7 @@ var newSessionHandlers = {
     }
 };
 
-var startSearchHandlers = Alexa.CreateStateHandler(states.SEARCHMODE, {
+var startSearchHandlers = Alexa.CreateStateHandler(states.PHRASES, {
     'AMAZON.HelpIntent': function () {
 
         output = HelpMessage;
@@ -112,6 +125,36 @@ var startSearchHandlers = Alexa.CreateStateHandler(states.SEARCHMODE, {
         output = locationOverview;
 
         this.emit(':tellWithCard', output, location, locationOverview);
+    },
+
+    'AMAZON.YesIntent': function() {
+        var phrase = phrases[Math.floor(Math.random() * attractions.length)];
+        if (phrase) {
+            //output = attraction.name + " " + attraction.content + newline + moreInformation;
+            //cardTitle = attraction.name;
+            //cardContent = attraction.content + newline + attraction.contact;
+
+            this.emit(':askWithCard', phrase + 'Would you like to hear another?', 'Alexa is Silly', phrase);
+        } else {
+            this.emit(':ask', noAttractionErrorMessage, tryAgainMessage);
+        }
+    },
+
+    'sayPhrase': function () {
+
+        //var cardTitle = location;
+        //var cardContent = "";
+
+        var phrase = phrases[Math.floor(Math.random() * attractions.length)];
+        if (phrase) {
+            //output = attraction.name + " " + attraction.content + newline + moreInformation;
+            //cardTitle = attraction.name;
+            //cardContent = attraction.content + newline + attraction.contact;
+
+            this.emit(':askWithCard', phrase + 'Would you like to hear another?', 'Alexa is Silly', phrase);
+        } else {
+            this.emit(':ask', noAttractionErrorMessage, tryAgainMessage);
+        }
     },
 
     'getAttractionIntent': function () {
@@ -145,11 +188,6 @@ var startSearchHandlers = Alexa.CreateStateHandler(states.SEARCHMODE, {
 
         this.handler.state = states.TOPFIVE;
         this.emit(':askWithCard', output, topFiveMoreInfo, cardTitle, output);
-    },
-
-    'AMAZON.YesIntent': function () {
-        output = HelpMessage;
-        this.emit(':ask', output, HelpMessage);
     },
 
     'AMAZON.NoIntent': function () {
