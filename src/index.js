@@ -18,7 +18,7 @@ var welcomeRepromt = "You can ask me for an attraction, the local news, or  say 
 
 var locationOverview = "Seattle is a West Coast seaport city and the  seat of King County. With an estimated 684,451 residents as of 2015, Seattle is the largest city in both the state of Washington and the Pacific Northwest region of North America.";
 
-var HelpMessage = "Here are some things you  can say: Give me an attraction. Tell me about " + location + ". Tell me the top five things to do. Tell me the local news.  What would you like to do?";
+var HelpMessage = "Ruh roh. There's a problem going on.";
 
 var moreInformation = "See your  Alexa app for  more  information."
 
@@ -41,21 +41,82 @@ var hearMoreMessage = "Would you like to hear about another top thing that you c
 var newline = "\n";
 
 var output = "";
-
+var phraseReprompt = "Would you like to hear another silly?";
 var alexa;
 
 var phrases = [
-  'This is really dummy dumm dumm.',
-  'My name is stink face toilet butt',
-  'I saw you picking your nose',
-  'Look! There is a unicorn outside! Why is she wearing a jet pack?',
-  'I like to eat garbage. It tastes like chicken. Popcorn chicken.',
-  'Pooop poopy poo poo pee',
-  'There\'s a tiny demon in your shoe. I promise',
-  'When you least expect it I will be watching',
-  'Toadstool pumpkin diarrhea',
-  'arbajarba humbleback',
-  'I feel ickly sickly'
+  {
+    'text': 'This is really dummy dumm dumm',
+    'said': false
+  },
+  {
+    'text': 'My name is stink face toilet butt',
+    'said': false
+  },
+  {
+    'text': 'I saw you picking your nose',
+    'said': false
+  },
+  {
+    'text': 'Look! There is a unicorn outside! Why is she wearing a jet pack?',
+    'said': false
+  },
+  {
+    'text': 'I like to eat garbage. It tastes like chicken. Popcorn chicken',
+    'said': false
+  },
+  {
+    'text': 'Pooop poopy poo poo pee',
+    'said': false
+  },
+  {
+    'text': 'There\'s a tiny demon in your shoe. I promise',
+    'said': false
+  },
+  {
+    'text': 'When you least expect it I will be watching',
+    'said': false
+  },
+  {
+    'text': 'Toadstool pumpkin diarrhea',
+    'said': false
+  },
+  {
+    'text': 'arbajarba humbleback',
+    'said': false
+  },
+  {
+    'text': 'I feel ickly sickly because I stuck a cactus in my ear. That was dumb',
+    'said': false
+  },
+  {
+    'text': 'I\'m watching you from your own eyeball',
+    'said': false
+  },
+  {
+    'text': 'I like to eat my own throw up, but only if it\'s glittery',
+    'said': false
+  },
+  {
+    'text': 'I wear my underpants over my jeans on Wednesdays. It\'s my special thing',
+    'said': false
+  },
+  {
+    'text': 'Crazy chicken pony say bawk bawk nay nay nay',
+    'said': false
+  },
+  {
+    'text': 'I smell something really really bad. Like a demon fart',
+    'said': false
+  },
+  {
+    'text': 'Your mama is really weird. Why does she wear that strange armor like a knight?',
+    'said': false
+  },
+  {
+    'text': 'Goober doober koo koo koo',
+    'said': false
+  }
 ];
 
 var attractions = [
@@ -79,8 +140,6 @@ var topFiveIntro = "Here are the top five things to  do in " + location + ".";
 var newSessionHandlers = {
     'LaunchRequest': function () {
       this.handler.state = states.PHRASES;
-      //output = welcomeMessage;
-      //this.emit(':ask', output, welcomeRepromt);
       this.emitWithState('sayPhrase');
     },
     'getAttractionIntent': function () {
@@ -112,11 +171,10 @@ var newSessionHandlers = {
     }
 };
 
+
 var startSearchHandlers = Alexa.CreateStateHandler(states.PHRASES, {
     'AMAZON.HelpIntent': function () {
-
         output = HelpMessage;
-
         this.emit(':ask', output, HelpMessage);
     },
 
@@ -128,33 +186,25 @@ var startSearchHandlers = Alexa.CreateStateHandler(states.PHRASES, {
     },
 
     'AMAZON.YesIntent': function() {
-        var phrase = phrases[Math.floor(Math.random() * attractions.length)];
-        if (phrase) {
-            //output = attraction.name + " " + attraction.content + newline + moreInformation;
-            //cardTitle = attraction.name;
-            //cardContent = attraction.content + newline + attraction.contact;
-
-            this.emit(':askWithCard', phrase + 'Would you like to hear another?', 'Alexa is Silly', phrase);
-        } else {
-            this.emit(':ask', noAttractionErrorMessage, tryAgainMessage);
-        }
+      var filtered = phrases.filter(phrase => phrase.said === false);
+      var phrase = filtered[Math.floor(Math.random() * phrases.length)];
+      phrase.said = true;
+      if (phrase) {
+        this.emit(':askWithCard', phrase.text + ' Would you like to hear another?', phraseReprompt);
+      } else {
+         this.emit(':ask', noAttractionErrorMessage, tryAgainMessage);
+      }
     },
 
     'sayPhrase': function () {
-
-        //var cardTitle = location;
-        //var cardContent = "";
-
-        var phrase = phrases[Math.floor(Math.random() * attractions.length)];
-        if (phrase) {
-            //output = attraction.name + " " + attraction.content + newline + moreInformation;
-            //cardTitle = attraction.name;
-            //cardContent = attraction.content + newline + attraction.contact;
-
-            this.emit(':askWithCard', phrase + 'Would you like to hear another?', 'Alexa is Silly', phrase);
-        } else {
-            this.emit(':ask', noAttractionErrorMessage, tryAgainMessage);
-        }
+      var filtered = phrases.filter(phrase => phrase.said === false);
+      var phrase = filtered[Math.floor(Math.random() * phrases.length)];
+      phrase.said = true;
+      if (phrase) {
+        this.emit(':askWithCard', phrase.text + ' Would you like to hear another?', phraseReprompt);
+      } else {
+         this.emit(':ask', noAttractionErrorMessage, tryAgainMessage);
+      }
     },
 
     'getAttractionIntent': function () {
